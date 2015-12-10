@@ -7,16 +7,25 @@ function actionSetRepo(repo) {
   var request = axios.get('/api/' + repo);
 
   request.then(function(response) {
-    app.setState({
-      repoName: repo,
-      wordStats: response.data.stats.slice(0, 20)
-    });
+    if (response.data.error) {
+      throw new Error(response.data.error);
+    } else {
+      app.setState({
+        error: null,
+        repoName: repo,
+        wordStats: response.data.stats.slice(0, 20)
+      });
+    }
   }).catch(function(err) {
     var msg = err instanceof Error ?
       err.message :
       'status code ' + err.status + ' ' + err.statusText;
 
     console.error('Error while loading repo ' + repo + ': ', msg);
+
+    app.setState({
+      error: msg
+    });
   });
 }
 
@@ -39,6 +48,14 @@ var RepoNameForm = React.createClass({
     actionSetRepo(name);
 
     this.refs.name.value = '';
+  }
+});
+
+var LoadError = React.createClass({
+  render: function() {
+    return (
+      <h2>{this.props.message}</h2>
+    );
   }
 });
 
@@ -82,8 +99,15 @@ var App = React.createClass({
     return (
       <div>
         <RepoNameForm label="Enter repository name"/>
-        <RepoName name={this.state.repoName}/>
-        <WordStats wordStats={this.state.wordStats}/>
+        {
+          this.state.error ?
+            <LoadError message={this.state.error}/>
+          :
+            <div>
+              <RepoName name={this.state.repoName}/>
+              <WordStats wordStats={this.state.wordStats}/>
+            </div>
+        }
       </div>
     );
   }

@@ -27,6 +27,12 @@ h1 {
   font-size: $font-big-size;
 }
 
+h2 {
+  color: red;
+  font-size: $font-base-size;
+  font-weight: normal;
+}
+
 table.wordStats {
   width: 300px;
 
