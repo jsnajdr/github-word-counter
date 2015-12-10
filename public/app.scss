@@ -1,0 +1,36 @@
+$font: sans-serif;
+$font-base-size: 13px;
+$font-big-size: 16px;
+$company-color: CadetBlue;
+$padding-unit: 5px;
+
+body {
+  font-family: $font;
+  font-size: $font-base-size;
+}
+
+input {
+  border: 1px solid $company-color;
+  padding: $padding-unit;
+}
+
+button {
+  background-color: $company-color;
+  color: white;
+  border: 1px $company-color;
+  padding: $padding-unit;
+  margin-left: $padding-unit;
+}
+
+h1 {
+  color: $company-color;
+  font-size: $font-big-size;
+}
+
+table.wordStats {
+  width: 300px;
+
+  td.count {
+    color: $company-color;
+  }
+}
