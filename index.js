@@ -1,11 +1,9 @@
-"use strict";
-
-var express = require('express');
-var axios = require('axios');
-var mkdirp = require('mkdirp');
-var path = require('path');
-var fs = require('fs');
-var format = require('util').format;
+import express from 'express';
+import axios from 'axios';
+import mkdirp from 'mkdirp';
+import path from 'path';
+import fs from 'fs';
+import { format } from 'util';
 
 var cacheDir = './cache';
 mkdirp.sync(cacheDir);
@@ -27,42 +25,28 @@ function isShortWord(word) {
 }
 
 function computeStats(user, repo, commits) {
-  var messages = commits.map(function(item) {
-    return item.commit.message;
-  });
+  var messages = commits.map(item => item.commit.message);
 
-  var words = messages.reduce(function(accu, msg) {
-    var w = msg.match(/\w+/g);
-    return accu.concat(w);
-  }, []);
+  var words = messages.reduce((accu, msg) => accu.concat(msg.match(/\w+/g)), []);
 
   var filteredWords = words.filter(isShortWord);
 
-  var freqs = filteredWords.reduce(function(accu, word) {
-    if (accu[word]) {
-      accu[word] += 1;
-    } else {
-      accu[word] = 1;
-    }
-
-    return accu;
-  }, {});
+  var freqs = new Map();
+  filteredWords.forEach(function(word) {
+    var prevValue = freqs.get(word) || 0;
+    freqs.set(word, prevValue + 1);
+  });
 
   var stats = [];
 
-  for (var w in freqs) {
-    if (freqs.hasOwnProperty(w)) {
-      stats.push({ word: w, count: freqs[w] });
-    }
+  for (let w of freqs.entries()) {
+    stats.push({ word: w[0], count: w[1] });
   }
 
-  var sortedStats = stats.sort(function(a, b) {
-    return b.count - a.count
-  });
+  var sortedStats = stats.sort((a, b) => b.count - a.count);
 
   return {
     repo: [ user, repo ].join('/'),
-    log: messages,
     stats: sortedStats
   };
 }
@@ -72,10 +56,7 @@ var app = express();
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
 
-app.get('/api/:user/:repo', function(req, res) {
-  var user = req.params.user;
-  var repo = req.params.repo;
-
+app.get('/api/:user/:repo', function({ params: { user, repo } }, res) {
   var cacheFileName = path.join(cacheDir, format("%s.%s.json", user, repo));
   var url = format('https://api.github.com/repos/%s/%s/commits', user, repo);
 
